@@ -341,9 +341,9 @@ All the materials, including code, checkpoints, and demo, are made available und
 
 ## 🌏 Citation
 <pre> 
-  @article{xu2025hypermotion,
+@article{xu2025hypermotion,
   title={Hypermotion: Dit-based pose-guided human image animation of complex motions},
-  author={Xu, Shuolin and Zheng, Siming and Wang, Ziyi and Yu, HC and Chen, Jinwei and Zhang, Huaqi and Li, Bo and Jiang, Peng-Tao},
+  author={Xu, Shuolin and Zheng, Siming and Wang, Ziyi and Yu, HC and Chen, Jinwei and Zhang, Huaqi, and Zhou Daquan, and Tong-Yee Lee, and Li, Bo and Jiang, Peng-Tao},
   journal={arXiv preprint arXiv:2505.22977},
   year={2025}
 }
