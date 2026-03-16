@@ -1,0 +1,39 @@
+experiment_name: demo_sign_test
+
+paths:
+  source_video: experiments/demo_sign_test/input/source.mp4
+  reference_image: experiments/demo_sign_test/input/ref.jpg
+  pose_json: experiments/demo_sign_test/input/pose.json
+  pose_video: experiments/demo_sign_test/input/pose.mp4
+
+pose:
+  source: auto
+  detector: mediapipe
+  mode: body_hands_face
+  smoothing: one_euro
+  render_h264: true
+  min_confidence: 0.2
+
+framing:
+  target: waist_up
+  crop_mode: waist_up
+  output_width: 768
+  output_height: 512
+  padding_ratio: 0.2
+  reference_frame_index: 0
+
+runtime:
+  mode: local_prep_only
+  remote_backend: aws
+  remote_host: gpu-box
+  remote_workdir: ~/hypermotion
+
+storage:
+  model_root: assets/model_store
+  xpose_root: assets/xpose
+  outputs_root: outputs
+  logs_root: logs
+
+notes:
+  signer: test_signer_01
+  language: sign_language_experiment

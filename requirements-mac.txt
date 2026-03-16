@@ -1,0 +1,13 @@
+PyYAML>=6.0
+Pillow>=10.4.0
+numpy>=1.26.4
+opencv-python>=4.10.0.84
+tqdm>=4.66.4
+imageio>=2.36.0
+imageio-ffmpeg>=0.5.1
+ffmpeg-python>=0.2.0
+torch>=2.2.0
+torchvision>=0.17.0
+mediapipe>=0.10.14
+matplotlib>=3.9.2
+huggingface_hub>=1.0.0

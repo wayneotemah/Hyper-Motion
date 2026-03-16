@@ -183,7 +183,7 @@ At this point we have control_videos and videos_gt two folders.
 2. Since the original text is rather simple and lacks a description of the character's appearance, you can download [InternVL3.0](https://internvl.readthedocs.io/en/latest/internvl3.0/introduction.html) and mark it up yourself.
 ```
 # Add HF_ENDPOINT=https://hf-mirror.com before the command if you cannot access to huggingface.com
-huggingface-cli download OpenGVLab/InternVL3-14B --local-dir-use-symlinks False --local-dir /PATH/TO/INTERNVL3_MODEL
+hf download OpenGVLab/InternVL3-14B --local-dir-use-symlinks False --local-dir /PATH/TO/INTERNVL3_MODEL
 
 python video_description.py
     --video_folder ./data/datasets/videos_gt  \
@@ -242,8 +242,114 @@ pip install -r requirements.txt
 ### [hyper-wan2.1-14B-1.0](https://huggingface.co/shuolin/HyperMotion)
 ```
 # Add HF_ENDPOINT=https://hf-mirror.com before the command if you cannot access to huggingface.com
-huggingface-cli download shuolin/HyperMotion --local-dir ./ckpts
+hf download shuolin/HyperMotion --local-dir ./ckpts
 ```
+
+## 🍎 macOS local prep workflow
+
+This repository now includes a Mac-friendly local preparation path for Ishara sign-language experiments. It is designed for Apple Silicon laptops that can handle setup, pose extraction, reference-frame prep, control-video rendering, and experiment packaging, while leaving full HyperMotion generation to a remote CUDA machine.
+
+### What the Mac path does
+
+- Bootstraps a Python 3.10, 3.11, or 3.12 virtual environment without any CUDA assumptions
+- Verifies whether MPS, Torch, OpenCV, ffmpeg, disk, and RAM are available
+- Uses `MediaPipe` as the default local pose fallback when `input/pose.json` is missing
+- Normalizes pose data into a single JSON schema, smooths it, and renders a clean pose-control video
+- Extracts a signer-friendly waist-up reference image
+- Packages an experiment folder and prints the remote handoff requirements
+
+### Model storage
+
+The local workflow defaults to a central in-repo model folder:
+
+```bash
+HYPERMOTION_MODEL_ROOT=assets/model_store
+```
+
+If you move the weights to an external drive later, update `.env` or your shell before running the scripts:
+
+```bash
+cp .env.example .env
+# Example external-drive override on macOS
+export HYPERMOTION_MODEL_ROOT=/Volumes/IsharaDrive/hypermotion-models
+```
+
+To download the official checkpoint into the local or external model store:
+
+```bash
+hf download shuolin/HyperMotion \
+  --local-dir "${HYPERMOTION_MODEL_ROOT:-assets/model_store/HyperMotion}"
+```
+
+### Quick start on Apple Silicon
+
+```bash
+./scripts/bootstrap_mac.sh
+.venv/bin/python scripts/verify_env.py
+```
+
+The environment checker classifies a 16 GB Apple Silicon laptop as `REMOTE_INFERENCE_REQUIRED` by default. That is intentional: local prep is supported, full video generation is still expected to run on Linux + CUDA.
+
+### Experiment structure
+
+```text
+experiments/<experiment_name>/
+  input/
+    source.mp4
+    ref.jpg
+    pose.json
+    pose.mp4
+  config.yaml
+  derived/
+  output/
+  logs/
+```
+
+Start from `configs/experiment_template.yaml` and point it at your experiment directory. The local tooling uses waist-up signing defaults and prioritizes face, shoulders, forearms, and hands.
+
+### Main commands
+
+```bash
+make verify
+make prep EXPERIMENT=demo_sign_test
+make package EXPERIMENT=demo_sign_test
+make remote EXPERIMENT=demo_sign_test
+```
+
+Equivalent direct script entry points:
+
+```bash
+.venv/bin/python scripts/validate_inputs.py --config experiments/demo_sign_test/config.yaml --allow-pose-generation
+.venv/bin/python scripts/run_local_prep.py --config experiments/demo_sign_test/config.yaml
+.venv/bin/python scripts/run_remote_stub.py --config experiments/demo_sign_test/config.yaml --package
+```
+
+### Useful utilities
+
+Extract a signer-friendly reference image:
+
+```bash
+.venv/bin/python scripts/extract_ref_frame.py \
+  --input experiments/demo_sign_test/input/source.mp4 \
+  --output experiments/demo_sign_test/input/ref.jpg \
+  --frame-number 12 \
+  --crop-mode waist_up \
+  --output-width 768 \
+  --output-height 512
+```
+
+Render a clean control video from a pose JSON file:
+
+```bash
+.venv/bin/python scripts/make_pose_video.py \
+  --input experiments/demo_sign_test/input/pose.json \
+  --output experiments/demo_sign_test/derived/pose_control_h264.mp4 \
+  --mode body_hands_face \
+  --smooth one_euro \
+  --h264
+```
+
+The remote handoff stub writes `experiments/<experiment_name>/derived/remote_run.sh` and a JSON summary of the files you need to move to a CUDA box.
 
 ## 🗿 Inference data preparation
 ### Why use [Xpose](https://github.com/IDEA-Research/X-Pose)?

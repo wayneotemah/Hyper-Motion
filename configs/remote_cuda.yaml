@@ -1,0 +1,26 @@
+runtime:
+  mode: remote_inference
+  remote_backend: ssh
+  remote_host: linux-cuda-box
+  remote_workdir: ~/hypermotion
+
+storage:
+  model_root: /mnt/models/hypermotion
+  xpose_root: /mnt/models/xpose
+  outputs_root: outputs
+  logs_root: logs
+
+pose:
+  detector: xpose
+  mode: body_hands_face
+  smoothing: one_euro
+  render_h264: true
+  min_confidence: 0.2
+
+framing:
+  target: waist_up
+  crop_mode: waist_up
+  output_width: 768
+  output_height: 512
+  padding_ratio: 0.2
+  reference_frame_index: 0
